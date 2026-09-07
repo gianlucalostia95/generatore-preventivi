@@ -9,9 +9,10 @@ generare la fattura in PDF corrispondente, annullarne la fatturazione,
 eliminarlo o esportare l'elenco in CSV.
 """
 
+import csv
+import io
 from datetime import date
 
-import pandas as pd
 import streamlit as st
 
 import database
@@ -71,8 +72,19 @@ if not preventivi:
     st.info("Nessun preventivo trovato con i filtri selezionati.")
 else:
     # --- Esportazione CSV, utile per la contabilita' -------------------
-    tabella_csv = pd.DataFrame(
-        [
+    # Usa il modulo "csv" della libreria standard (invece di pandas) cosi'
+    # da non dover importare numpy/pandas solo per questa esportazione: le
+    # loro librerie compilate possono essere bloccate da software di
+    # sicurezza come Smart App Control su Windows.
+    buffer_csv = io.StringIO()
+    intestazioni = [
+        "Numero", "Data", "Cliente", "Subtotale", "IVA", "Totale",
+        "Stato", "Numero Fattura", "Data Fattura",
+    ]
+    scrittore_csv = csv.DictWriter(buffer_csv, fieldnames=intestazioni)
+    scrittore_csv.writeheader()
+    for p in preventivi:
+        scrittore_csv.writerow(
             {
                 "Numero": p["numero"],
                 "Data": p["data"],
@@ -84,12 +96,10 @@ else:
                 "Numero Fattura": p["numero_fattura"] or "",
                 "Data Fattura": p["data_fattura"] or "",
             }
-            for p in preventivi
-        ]
-    )
+        )
     st.download_button(
         "⬇️ Esporta elenco in CSV",
-        data=tabella_csv.to_csv(index=False).encode("utf-8-sig"),
+        data=buffer_csv.getvalue().encode("utf-8-sig"),
         file_name="storico_preventivi.csv",
         mime="text/csv",
     )
