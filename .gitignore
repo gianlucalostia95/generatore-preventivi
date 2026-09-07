@@ -1,0 +1,16 @@
+# Ambiente virtuale Python (ognuno crea il proprio, vedi README)
+venv/
+__pycache__/
+*.pyc
+
+# Database locale e dati personali: contiene i dati reali dell'utente
+# (profilo mittente, clienti, preventivi) e non deve mai essere pubblicato.
+preventivi.db
+anagrafiche_salvate.json
+
+# File di backup/prototipi non piu' in uso
+*.bak
+
+# File di sistema
+.DS_Store
+Thumbs.db
