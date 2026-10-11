@@ -1,0 +1,32 @@
+  <div class="testata-pagina">
+    <div>
+      <h1>Profilo mittente</h1>
+      <p>I tuoi dati aziendali, salvati una sola volta: verranno proposti automaticamente in ogni nuovo preventivo.</p>
+    </div>
+  </div>
+
+  <div class="avviso avviso-ok" role="status" data-messaggio-salvato {% if not salvato %}hidden{% endif %}>Profilo salvato.</div>
+
+  <form class="riquadro" method="post" action="/profilo" data-form-profilo style="max-width: 560px;">
+    <div class="campo">
+      <label for="nome">Nome / Ragione Sociale</label>
+      <input type="text" id="nome" name="nome" value="{{ profilo.nome or '' }}">
+    </div>
+    <div class="campo">
+      <label for="piva">P.IVA / Codice Fiscale</label>
+      <input type="text" id="piva" name="piva" value="{{ profilo.piva or '' }}">
+    </div>
+    <div class="campo">
+      <label for="indirizzo">Indirizzo</label>
+      <input type="text" id="indirizzo" name="indirizzo" value="{{ profilo.indirizzo or '' }}">
+    </div>
+    <div class="campo">
+      <label for="contatti">Contatti (telefono, email)</label>
+      <input type="text" id="contatti" name="contatti" value="{{ profilo.contatti or '' }}">
+    </div>
+    <div class="campo">
+      <label for="iban">IBAN per il bonifico</label>
+      <input type="text" id="iban" name="iban" value="{{ profilo.iban or '' }}">
+    </div>
+    <button type="submit" class="bottone bottone-primario">Salva profilo</button>
+  </form>

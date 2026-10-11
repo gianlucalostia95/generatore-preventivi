@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block titolo %}Anagrafica Clienti — Generatore di Preventivi{% endblock %}
+{% block contenuto %}
+  <div class="testata-pagina">
+    <div>
+      <h1>Anagrafica clienti</h1>
+      <p>Salva, cerca, modifica ed elimina i clienti da riutilizzare nei preventivi.</p>
+    </div>
+    <a class="bottone bottone-secondario" href="/clienti/export.xlsx?ricerca={{ ricerca }}">Esporta XLSX</a>
+  </div>
+
+  <form method="get" action="/clienti" class="riquadro" style="display:flex; gap:0.75rem; align-items:end;">
+    <div class="campo" style="flex:1; margin-bottom:0;">
+      <label for="ricerca">Cerca cliente per nome</label>
+      <input type="text" id="ricerca" name="ricerca" value="{{ ricerca }}" placeholder="Es. Mario Rossi">
+    </div>
+    <button type="submit" class="bottone bottone-secondario">Cerca</button>
+    {% if ricerca %}<a href="/clienti" class="bottone bottone-secondario">Azzera</a>{% endif %}
+  </form>
+
+  <h2>Clienti salvati</h2>
+  {% if clienti %}
+    <div class="elenco-schede" style="margin-bottom: 1.5rem;">
+      {% for cliente in clienti %}
+        <details class="scheda">
+          <summary>{{ cliente.nome }}<span class="scheda-meta">{{ cliente.piva or '' }}</span></summary>
+          <div class="scheda-corpo">
+            <form method="post" action="/clienti/{{ cliente.id }}">
+              <div class="riga-campi">
+                <div class="campo">
+                  <label for="nome-{{ cliente.id }}">Nome / Ragione Sociale</label>
+                  <input type="text" id="nome-{{ cliente.id }}" name="nome" value="{{ cliente.nome or '' }}" required>
+                </div>
+                <div class="campo">
+                  <label for="indirizzo-{{ cliente.id }}">Indirizzo</label>
+                  <input type="text" id="indirizzo-{{ cliente.id }}" name="indirizzo" value="{{ cliente.indirizzo or '' }}">
+                </div>
+              </div>
+              <div class="riga-campi">
+                <div class="campo">
+                  <label for="piva-{{ cliente.id }}">P.IVA / Codice Fiscale</label>
+                  <input type="text" id="piva-{{ cliente.id }}" name="piva" value="{{ cliente.piva or '' }}">
+                </div>
+                <div class="campo">
+                  <label for="email-{{ cliente.id }}">Email</label>
+                  <input type="email" id="email-{{ cliente.id }}" name="email" value="{{ cliente.email or '' }}" autocomplete="email">
+                </div>
+              </div>
+              <div class="azioni-scheda">
+                <button type="submit" class="bottone bottone-primario bottone-piccolo">Salva modifiche</button>
+              </div>
+            </form>
+            <form method="post" action="/clienti/{{ cliente.id }}/elimina" style="margin-top:0.5rem;" data-conferma="Eliminare definitivamente {{ cliente.nome }} dall'anagrafica?">
+              <button type="submit" class="bottone bottone-pericolo bottone-piccolo">Elimina cliente</button>
+            </form>
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="vuoto">{% if ricerca %}Nessun cliente trovato per "{{ ricerca }}".{% else %}Nessun cliente salvato ancora.{% endif %}</div>
+  {% endif %}
+
+  <h2>Aggiungi nuovo cliente</h2>
+  <form method="post" action="/clienti" class="riquadro">
+    <div class="riga-campi">
+      <div class="campo">
+        <label for="nuovo-nome">Nome / Ragione Sociale</label>
+        <input type="text" id="nuovo-nome" name="nome" required>
+      </div>
+      <div class="campo">
+        <label for="nuovo-indirizzo">Indirizzo</label>
+        <input type="text" id="nuovo-indirizzo" name="indirizzo">
+      </div>
+    </div>
+    <div class="riga-campi">
+      <div class="campo">
+        <label for="nuovo-piva">P.IVA / Codice Fiscale</label>
+        <input type="text" id="nuovo-piva" name="piva">
+      </div>
+      <div class="campo">
+        <label for="nuovo-email">Email</label>
+        <input type="email" id="nuovo-email" name="email" autocomplete="email">
+      </div>
+    </div>
+    <button type="submit" class="bottone bottone-primario">Aggiungi cliente</button>
+  </form>
+{% endblock %}

@@ -58,6 +58,7 @@ def genera_pdf_documento(
     note: str = "",
     validita_giorni: int = None,
     riferimento_preventivo: str = None,
+    info_sconto: dict = None,
 ) -> bytes:
     """
     Costruisce un documento PDF (preventivo o fattura) con un layout pulito
@@ -69,6 +70,12 @@ def genera_pdf_documento(
             di scadenza dell'offerta; va lasciato a None per le fatture.
         riferimento_preventivo: usato solo per le fatture, per indicare da
             quale preventivo derivano (numero del preventivo di origine).
+        info_sconto: se indicato (dict con "descrizione", "importo" e
+            "subtotale_originale"), mostra nel riepilogo lo sconto applicato
+            in fattura. In questo caso `subtotale`, `riepilogo_iva_per_aliquota`,
+            `totale_iva` e `totale` devono essere i valori GIA' netti (dopo
+            lo sconto): questa funzione si limita a mostrare anche il
+            subtotale originale e la riga dello sconto per trasparenza.
 
     Ogni voce puo' avere una propria aliquota IVA: il riepilogo finale
     mostra il totale IVA raggruppato per ciascuna aliquota utilizzata.
@@ -152,7 +159,20 @@ def genera_pdf_documento(
     larghezza_valore = larghezza_iva + larghezza_totale
 
     pdf.set_font("Helvetica", "", 10)
-    pdf.cell(larghezza_etichetta, 7, "Subtotale (imponibile)")
+    if info_sconto:
+        pdf.cell(larghezza_etichetta, 7, "Subtotale (prima dello sconto)")
+        pdf.cell(
+            larghezza_valore, 7, f"{info_sconto['subtotale_originale']:.2f} EUR",
+            align="C", new_x="LMARGIN", new_y="NEXT",
+        )
+        pdf.cell(larghezza_etichetta, 7, sanifica_testo(info_sconto["descrizione"]))
+        pdf.cell(
+            larghezza_valore, 7, f"-{info_sconto['importo']:.2f} EUR",
+            align="C", new_x="LMARGIN", new_y="NEXT",
+        )
+        pdf.cell(larghezza_etichetta, 7, "Subtotale netto")
+    else:
+        pdf.cell(larghezza_etichetta, 7, "Subtotale (imponibile)")
     pdf.cell(larghezza_valore, 7, f"{subtotale:.2f} EUR", align="C", new_x="LMARGIN", new_y="NEXT")
 
     # L'IVA viene mostrata suddivisa per aliquota, nel caso il documento

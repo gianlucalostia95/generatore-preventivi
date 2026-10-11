@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titolo %}Generatore di Preventivi{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/static/css/style.css">
+  {% block testa_extra %}{% endblock %}
+</head>
+<body>
+  <a class="salta-contenuto" href="#contenuto-principale">Salta al contenuto principale</a>
+
+  <header class="intestazione">
+    <a class="marchio" href="/">
+      <img src="/static/favicon.svg" alt="" width="26" height="26">
+      <span>Preventivi</span>
+    </a>
+    <nav class="nav-principale" aria-label="Sezioni principali">
+      <a href="/preventivi/nuovo" class="{{ 'attiva' if request.url.path.startswith('/preventivi') }}">Nuovo preventivo</a>
+      <a href="/clienti" class="{{ 'attiva' if request.url.path.startswith('/clienti') }}">Gestione clienti</a>
+    </nav>
+    <button type="button" id="apri-pannello-profilo" class="bottone-profilo" aria-haspopup="dialog" aria-expanded="false" aria-controls="pannello-profilo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke-linecap="round"/>
+        <circle cx="12" cy="8" r="3.6"/>
+      </svg>
+      <span>Gestione profilo</span>
+    </button>
+  </header>
+
+  <main class="contenuto-principale" id="contenuto-principale">
+    {% block contenuto %}{% endblock %}
+  </main>
+
+  <div id="sfondo-pannello" class="sfondo-pannello" hidden></div>
+  <aside id="pannello-profilo" class="pannello-profilo" aria-hidden="true" aria-label="Gestione profilo">
+    <div class="pannello-testata">
+      <h2>Gestione profilo</h2>
+      <button type="button" id="chiudi-pannello" class="bottone-chiudi" aria-label="Chiudi pannello">&times;</button>
+    </div>
+    <div class="pannello-tab" role="tablist">
+      <button type="button" class="tab-profilo attiva" data-tab="azienda" role="tab" aria-selected="true" id="tab-azienda">Dati azienda</button>
+      <button type="button" class="tab-profilo" data-tab="storico" role="tab" aria-selected="false" id="tab-storico">Storico</button>
+    </div>
+    <div class="pannello-corpo">
+      <div class="tab-contenuto" data-contenuto="azienda" role="tabpanel" aria-labelledby="tab-azienda"></div>
+      <div class="tab-contenuto" data-contenuto="storico" role="tabpanel" aria-labelledby="tab-storico" hidden></div>
+    </div>
+  </aside>
+
+  <div id="sfondo-modale-fattura" class="sfondo-pannello" data-sfondo-modale hidden></div>
+  <div id="modale-fattura" class="modale-fattura" role="dialog" aria-modal="true" aria-labelledby="titolo-modale-fattura" hidden>
+    <div class="modale-corpo">
+      <div class="pannello-testata">
+        <h2 id="titolo-modale-fattura">Genera fattura</h2>
+        <button type="button" class="bottone-chiudi" data-chiudi-modale aria-label="Chiudi">&times;</button>
+      </div>
+      <div class="modale-contenuto">
+        <p>
+          Preventivo <strong data-rif-numero></strong> — <span data-rif-cliente></span>
+        </p>
+        <div class="riepilogo-totali" style="align-items: stretch;">
+          <div class="riga-riepilogo"><span>Subtotale</span><span class="valore" data-rif-subtotale></span></div>
+          <div class="riga-riepilogo"><span>IVA</span><span class="valore" data-rif-iva></span></div>
+          <div class="riga-riepilogo"><span>Totale preventivo</span><span class="valore" data-rif-totale></span></div>
+        </div>
+
+        <div class="riga-campi" style="margin-top: 1rem;">
+          <div class="campo">
+            <label for="modale-sconto-tipo">Sconto in fattura</label>
+            <select id="modale-sconto-tipo" data-sconto-tipo>
+              <option value="">Nessuno sconto</option>
+              <option value="percentuale">Percentuale (%)</option>
+              <option value="importo">Importo fisso (EUR)</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="modale-sconto-valore">Valore sconto</label>
+            <input type="number" id="modale-sconto-valore" data-sconto-valore min="0" step="0.5" value="0">
+          </div>
+        </div>
+
+        <div class="riepilogo-totali" style="align-items: stretch;">
+          <div class="riga-riepilogo"><span>Sconto applicato</span><span class="valore" data-rif-sconto-importo>—</span></div>
+          <div class="riga-riepilogo riga-riepilogo-totale"><span>Totale fattura</span><span class="valore" data-rif-totale-netto></span></div>
+        </div>
+
+        <div class="azioni-scheda" style="justify-content: flex-end; margin-top: 1rem;">
+          <button type="button" class="bottone bottone-secondario" data-chiudi-modale>Annulla</button>
+          <button type="button" class="bottone bottone-primario" data-conferma-fattura>Conferma e genera PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/confirmazioni.js"></script>
+  <script src="/static/js/pannello.js"></script>
+  <script src="/static/js/fattura.js"></script>
+  {% block script_extra %}{% endblock %}
+</body>
+</html>

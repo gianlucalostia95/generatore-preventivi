@@ -1,0 +1,94 @@
+  <div class="testata-pagina">
+    <div>
+      <h1>Storico preventivi</h1>
+      <p>Consulta, filtra, duplica o modifica i preventivi passati; gestisci la fatturazione.</p>
+    </div>
+  </div>
+
+  <div class="barra-azioni-storico">
+    <button type="button" class="bottone bottone-secondario bottone-piccolo" data-pannello-espandi>Schermo intero</button>
+    <a class="bottone bottone-secondario bottone-piccolo"
+       href="/storico/export.csv?cliente={{ filtri.cliente }}&numero={{ filtri.numero }}&data_da={{ filtri.data_da }}&data_a={{ filtri.data_a }}&stato={{ filtri.stato }}&importo_min={{ filtri.importo_min }}&importo_max={{ filtri.importo_max }}">
+      Esporta CSV
+    </a>
+    <a class="bottone bottone-secondario bottone-piccolo"
+       href="/storico/export.xlsx?cliente={{ filtri.cliente }}&numero={{ filtri.numero }}&data_da={{ filtri.data_da }}&data_a={{ filtri.data_a }}&stato={{ filtri.stato }}&importo_min={{ filtri.importo_min }}&importo_max={{ filtri.importo_max }}">
+      Esporta XLSX
+    </a>
+  </div>
+
+  <form method="get" action="/storico" class="riquadro barra-filtri" data-form-filtri>
+    <div class="campo">
+      <label for="f-cliente">Cliente</label>
+      <input type="text" id="f-cliente" name="cliente" value="{{ filtri.cliente }}">
+    </div>
+    <div class="campo">
+      <label for="f-numero">Numero</label>
+      <input type="text" id="f-numero" name="numero" value="{{ filtri.numero }}">
+    </div>
+    <div class="campo">
+      <label for="f-data-da">Data da</label>
+      <input type="date" id="f-data-da" name="data_da" value="{{ filtri.data_da }}">
+    </div>
+    <div class="campo">
+      <label for="f-data-a">Data a</label>
+      <input type="date" id="f-data-a" name="data_a" value="{{ filtri.data_a }}">
+    </div>
+    <div class="campo">
+      <label for="f-stato">Stato</label>
+      <select id="f-stato" name="stato">
+        <option value="Tutti" {{ 'selected' if filtri.stato == 'Tutti' }}>Tutti</option>
+        <option value="preventivo" {{ 'selected' if filtri.stato == 'preventivo' }}>Da fatturare</option>
+        <option value="fatturato" {{ 'selected' if filtri.stato == 'fatturato' }}>Fatturati</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label for="f-importo-min">Importo min</label>
+      <input type="number" id="f-importo-min" name="importo_min" step="10" min="0" value="{{ filtri.importo_min }}">
+    </div>
+    <div class="campo">
+      <label for="f-importo-max">Importo max</label>
+      <input type="number" id="f-importo-max" name="importo_max" step="10" min="0" value="{{ filtri.importo_max }}">
+    </div>
+    <button type="submit" class="bottone bottone-primario">Filtra</button>
+    <a href="/storico" class="bottone bottone-secondario" data-azzera-filtri>Azzera filtri</a>
+  </form>
+
+  {% if preventivi %}
+    <div class="elenco-schede">
+      {% for p in preventivi %}
+        <details class="scheda">
+          <summary>
+            <span>{{ p.numero }} &mdash; {{ p.cliente_nome }} &mdash; <span class="cifra">{{ "%.2f"|format(p.totale) }} EUR</span></span>
+            <span class="etichetta-stato {{ 'fatturato' if p.stato == 'fatturato' }}">{{ 'Fatturato' if p.stato == 'fatturato' else 'Da fatturare' }}</span>
+          </summary>
+          <div class="scheda-corpo">
+            <p><strong>Data:</strong> {{ p.data }} &nbsp;·&nbsp; <strong>Subtotale:</strong> <span class="cifra">{{ "%.2f"|format(p.subtotale) }} EUR</span> &nbsp;·&nbsp; <strong>IVA:</strong> <span class="cifra">{{ "%.2f"|format(p.totale_iva) }} EUR</span></p>
+            {% if p.note %}<p><strong>Note:</strong> {{ p.note }}</p>{% endif %}
+            {% if p.numero_fattura %}<p><strong>Fattura:</strong> {{ p.numero_fattura }} del {{ p.data_fattura }}</p>{% endif %}
+
+            <div class="azioni-scheda">
+              <a class="bottone bottone-secondario bottone-piccolo" href="/preventivi/{{ p.id }}/modifica">Modifica</a>
+              <a class="bottone bottone-secondario bottone-piccolo" href="/preventivi/{{ p.id }}/duplica">Duplica</a>
+              <form method="post" action="/preventivi/{{ p.id }}/elimina" style="display:inline;" data-conferma="Eliminare definitivamente il preventivo {{ p.numero }}? L'operazione non è reversibile." data-azione-storico>
+                <button type="submit" class="bottone bottone-pericolo bottone-piccolo">Elimina</button>
+              </form>
+            </div>
+
+            <div class="azioni-scheda">
+              {% if p.numero_fattura %}
+                <a class="bottone bottone-primario bottone-piccolo" href="/preventivi/{{ p.id }}/fattura.pdf">Scarica fattura PDF</a>
+                <form method="post" action="/preventivi/{{ p.id }}/fattura/annulla" style="display:inline;" data-azione-storico>
+                  <button type="submit" class="bottone bottone-secondario bottone-piccolo">Annulla fatturazione</button>
+                </form>
+              {% else %}
+                <button type="button" class="bottone bottone-primario bottone-piccolo" data-apri-modale-fattura data-preventivo-id="{{ p.id }}">Genera fattura PDF</button>
+              {% endif %}
+            </div>
+          </div>
+        </details>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="vuoto">Nessun preventivo trovato con questi filtri.</div>
+  {% endif %}

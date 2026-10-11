@@ -11,6 +11,10 @@ anagrafiche_salvate.json
 # File di backup/prototipi non piu' in uso
 *.bak
 
+# Certificato HTTPS locale (self-signed): chiave privata, non va pubblicata
+# e viene rigenerata facilmente con il comando in next-steps/ o nel README.
+certs/
+
 # File di sistema
 .DS_Store
 Thumbs.db

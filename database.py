@@ -121,6 +121,12 @@ def inizializza_database() -> None:
         connessione.execute("ALTER TABLE preventivi ADD COLUMN numero_fattura TEXT")
     if "data_fattura" not in colonne_esistenti:
         connessione.execute("ALTER TABLE preventivi ADD COLUMN data_fattura TEXT")
+    # Sconto applicato al momento della fatturazione (non al preventivo
+    # originale): "percentuale" o "importo", con il relativo valore.
+    if "sconto_tipo" not in colonne_esistenti:
+        connessione.execute("ALTER TABLE preventivi ADD COLUMN sconto_tipo TEXT")
+    if "sconto_valore" not in colonne_esistenti:
+        connessione.execute("ALTER TABLE preventivi ADD COLUMN sconto_valore REAL")
 
     connessione.commit()
     connessione.close()
@@ -420,13 +426,17 @@ def prossimo_numero_fattura() -> str:
     return f"FT-{anno_corrente}-{riga['ultimo_progressivo']:03d}"
 
 
-def genera_fattura_da_preventivo(preventivo_id: int):
+def genera_fattura_da_preventivo(preventivo_id: int, sconto_tipo: str = None, sconto_valore: float = None):
     """
     Trasforma un preventivo in fattura: se non e' mai stato fatturato, gli
     assegna un nuovo numero di fattura progressivo, la data odierna e lo
-    stato 'fatturato'. Se era gia' stato fatturato in precedenza, riutilizza
-    lo stesso numero e la stessa data (cosi' si puo' riscaricare lo stesso
-    PDF piu' volte senza generarne uno diverso ogni volta).
+    stato 'fatturato'; se vengono indicati, salva anche lo sconto da
+    applicare in fattura (non modifica il preventivo originale, solo come
+    viene fatturato). Se era gia' stato fatturato in precedenza, riutilizza
+    lo stesso numero, la stessa data e lo stesso sconto gia' salvato (cosi'
+    si puo' riscaricare lo stesso PDF piu' volte senza che cambi): eventuali
+    nuovi `sconto_tipo`/`sconto_valore` passati qui vengono ignorati in quel
+    caso (per cambiare lo sconto va prima annullata la fatturazione).
 
     Restituisce il preventivo aggiornato (con le sue voci), oppure None se
     il preventivo indicato non esiste.
@@ -441,8 +451,13 @@ def genera_fattura_da_preventivo(preventivo_id: int):
 
         connessione = ottieni_connessione()
         connessione.execute(
-            "UPDATE preventivi SET numero_fattura = ?, data_fattura = ?, stato = 'fatturato' WHERE id = ?",
-            (numero_fattura, data_fattura, preventivo_id),
+            """
+            UPDATE preventivi
+            SET numero_fattura = ?, data_fattura = ?, stato = 'fatturato',
+                sconto_tipo = ?, sconto_valore = ?
+            WHERE id = ?
+            """,
+            (numero_fattura, data_fattura, sconto_tipo, sconto_valore, preventivo_id),
         )
         connessione.commit()
         connessione.close()
@@ -450,19 +465,26 @@ def genera_fattura_da_preventivo(preventivo_id: int):
         preventivo["numero_fattura"] = numero_fattura
         preventivo["data_fattura"] = data_fattura
         preventivo["stato"] = "fatturato"
+        preventivo["sconto_tipo"] = sconto_tipo
+        preventivo["sconto_valore"] = sconto_valore
 
     return preventivo
 
 
 def annulla_fattura(preventivo_id: int) -> None:
     """
-    Annulla la fatturazione di un preventivo: rimuove numero e data della
-    fattura e riporta lo stato a 'preventivo'. Il preventivo stesso non
-    viene toccato.
+    Annulla la fatturazione di un preventivo: rimuove numero, data e
+    l'eventuale sconto della fattura, riportando lo stato a 'preventivo'.
+    Il preventivo stesso non viene toccato.
     """
     connessione = ottieni_connessione()
     connessione.execute(
-        "UPDATE preventivi SET numero_fattura = NULL, data_fattura = NULL, stato = 'preventivo' WHERE id = ?",
+        """
+        UPDATE preventivi
+        SET numero_fattura = NULL, data_fattura = NULL, stato = 'preventivo',
+            sconto_tipo = NULL, sconto_valore = NULL
+        WHERE id = ?
+        """,
         (preventivo_id,),
     )
     connessione.commit()

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block titolo %}{{ 'Modifica preventivo' if modalita == 'modifica' else 'Nuovo preventivo' }} — Generatore di Preventivi{% endblock %}
+{% block contenuto %}
+  <div class="testata-pagina">
+    <div>
+      <h1>{{ 'Modifica preventivo' if modalita == 'modifica' else 'Nuovo preventivo' }}</h1>
+      <p>Compila i campi: il preventivo verrà salvato nello storico e il PDF scaricato automaticamente.</p>
+    </div>
+  </div>
+
+  {% if avviso %}<div class="avviso avviso-info" role="status">{{ avviso }}</div>{% endif %}
+  <div id="area-errore" class="avviso avviso-errore" role="alert" hidden></div>
+
+  <form id="form-preventivo" novalidate>
+    <div class="riquadro griglia-2">
+      <div>
+        <h2>Chi emette il preventivo</h2>
+        <div class="campo">
+          <label for="m-nome">Nome / Ragione Sociale</label>
+          <input type="text" id="m-nome" value="{{ mittente.nome }}">
+        </div>
+        <div class="campo">
+          <label for="m-piva">P.IVA / Codice Fiscale</label>
+          <input type="text" id="m-piva" value="{{ mittente.piva }}">
+        </div>
+        <div class="campo">
+          <label for="m-indirizzo">Indirizzo</label>
+          <input type="text" id="m-indirizzo" value="{{ mittente.indirizzo }}">
+        </div>
+        <div class="campo">
+          <label for="m-contatti">Contatti (telefono, email)</label>
+          <input type="text" id="m-contatti" value="{{ mittente.contatti }}">
+        </div>
+        <div class="campo">
+          <label for="m-iban">IBAN per il bonifico</label>
+          <input type="text" id="m-iban" value="{{ mittente.iban }}">
+        </div>
+        <p>Precompilato dal <a href="/profilo">Profilo Mittente</a>. Le modifiche qui valgono solo per questo documento.</p>
+      </div>
+
+      <div>
+        <h2>Cliente destinatario</h2>
+        <div class="campo">
+          <label for="c-selettore">Cliente</label>
+          <select id="c-selettore">
+            <option value="">+ Nuovo cliente</option>
+            {% for cl in clienti %}
+              <option value="{{ cl.id }}" {{ 'selected' if cliente.id == cl.id }}>{{ cl.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="campo">
+          <label for="c-nome">Nome / Ragione Sociale</label>
+          <input type="text" id="c-nome" value="{{ cliente.nome }}">
+        </div>
+        <div class="campo">
+          <label for="c-indirizzo">Indirizzo</label>
+          <input type="text" id="c-indirizzo" value="{{ cliente.indirizzo }}">
+        </div>
+        <div class="campo">
+          <label for="c-piva">P.IVA / Codice Fiscale</label>
+          <input type="text" id="c-piva" value="{{ cliente.piva }}">
+        </div>
+        <div class="campo">
+          <label for="c-email">Email</label>
+          <input type="email" id="c-email" value="{{ cliente.email }}">
+        </div>
+        <div class="campo-check" id="area-salva-anagrafica">
+          <input type="checkbox" id="c-salva-anagrafica" checked>
+          <label for="c-salva-anagrafica" style="margin:0;">Salva questo cliente in anagrafica per riutilizzarlo in futuro</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="riquadro riga-campi">
+      <div class="campo">
+        <label for="p-numero">Numero preventivo</label>
+        <input type="text" id="p-numero" value="{{ numero }}">
+      </div>
+      <div class="campo">
+        <label for="p-data">Data preventivo</label>
+        <input type="date" id="p-data" value="{{ data }}">
+      </div>
+      <div class="campo">
+        <label for="p-validita">Validità offerta (giorni)</label>
+        <input type="number" id="p-validita" min="0" step="1" value="{{ validita_giorni }}">
+      </div>
+    </div>
+
+    <div class="riquadro">
+      <h2>Voci di spesa</h2>
+      <table class="tabella-voci">
+        <thead>
+          <tr>
+            <th>Descrizione</th>
+            <th class="col-qta">Quantità</th>
+            <th class="col-prezzo">Prezzo unit. (EUR)</th>
+            <th class="col-iva">IVA %</th>
+            <th class="col-totale">Totale</th>
+            <th class="col-azione"><span class="sr-only">Rimuovi</span></th>
+          </tr>
+        </thead>
+        <tbody id="corpo-voci"></tbody>
+      </table>
+      <button type="button" id="btn-aggiungi-voce" class="bottone bottone-secondario bottone-piccolo">+ Aggiungi voce</button>
+
+      <div class="campo" style="margin-top:1.25rem;">
+        <label for="p-note">Note aggiuntive (facoltative)</label>
+        <textarea id="p-note" placeholder="Es. condizioni di pagamento, tempi di consegna…">{{ note }}</textarea>
+      </div>
+
+      <div class="riepilogo-totali" id="riepilogo-totali">
+        <div class="riga-riepilogo"><span>Subtotale (imponibile)</span><span class="valore" id="val-subtotale">0,00 EUR</span></div>
+        <div class="riga-riepilogo"><span>Totale IVA</span><span class="valore" id="val-iva">0,00 EUR</span></div>
+        <div class="riga-riepilogo riga-riepilogo-totale"><span>TOTALE</span><span class="valore" id="val-totale">0,00 EUR</span></div>
+      </div>
+
+      <button type="submit" id="btn-salva" class="bottone bottone-primario">
+        {{ 'Salva modifiche e rigenera PDF' if modalita == 'modifica' else 'Genera e salva preventivo PDF' }}
+      </button>
+    </div>
+  </form>
+
+  <template id="modello-riga-voce">
+    <tr class="riga-voce">
+      <td><input type="text" class="voce-descrizione" placeholder="Descrizione" aria-label="Descrizione della voce"></td>
+      <td class="col-qta"><input type="number" class="voce-quantita" min="0" step="1" value="1" aria-label="Quantità"></td>
+      <td class="col-prezzo"><input type="number" class="voce-prezzo" min="0" step="0.01" value="0.00" aria-label="Prezzo unitario in euro"></td>
+      <td class="col-iva"><input type="number" class="voce-iva" min="0" max="100" step="0.5" value="22" aria-label="Aliquota IVA percentuale"></td>
+      <td class="col-totale riga-totale-voce">0,00</td>
+      <td class="col-azione"><button type="button" class="rimuovi-riga" aria-label="Rimuovi voce" title="Rimuovi voce">&times;</button></td>
+    </tr>
+  </template>
+
+  <script type="application/json" id="dati-iniziali">
+    {
+      "modalita": "{{ modalita }}",
+      "preventivoId": {{ preventivo_id or 'null' }},
+      "clienti": [{% for cl in clienti %}{"id": {{ cl.id }}, "nome": {{ cl.nome|tojson }}, "indirizzo": {{ (cl.indirizzo or '')|tojson }}, "piva": {{ (cl.piva or '')|tojson }}, "email": {{ (cl.email or '')|tojson }}}{% if not loop.last %},{% endif %}{% endfor %}],
+      "voci": [{% for v in voci %}{"descrizione": {{ v.descrizione|tojson }}, "quantita": {{ v.quantita }}, "prezzo_unitario": {{ v.prezzo_unitario }}, "aliquota_iva": {{ v.aliquota_iva }}}{% if not loop.last %},{% endif %}{% endfor %}]
+    }
+  </script>
+{% endblock %}
+{% block script_extra %}
+  <script src="/static/js/preventivo.js"></script>
+{% endblock %}

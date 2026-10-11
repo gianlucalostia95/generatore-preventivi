@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block titolo %}Generatore di Preventivi{% endblock %}
+{% block contenuto %}
+  <section class="hero">
+    <div class="hero-testo">
+      <h1>Preventivi e fatture pronti in pochi minuti</h1>
+      <p>Compila le voci, l'IVA si calcola da sola per ogni riga, e il PDF è pronto da inviare — con anagrafica clienti e storico sempre a portata di mano.</p>
+      <div class="hero-azioni">
+        <a href="/preventivi/nuovo" class="bottone bottone-primario">Crea il tuo preventivo</a>
+        <a href="/clienti" class="bottone bottone-secondario">Gestisci clienti</a>
+      </div>
+    </div>
+
+    <div class="hero-vetrina" aria-label="Riepilogo della tua attività">
+      <div class="vetrina-intestazione">
+        <span>Il tuo riepilogo</span>
+        <span>dati reali</span>
+      </div>
+      <div class="vetrina-riga">
+        <span>Preventivi emessi</span>
+        <span>{{ numero_preventivi }} &middot; {{ "%.2f"|format(somma_preventivi) }} EUR</span>
+      </div>
+      <div class="vetrina-riga">
+        <span>Fatture emesse</span>
+        <span>{{ numero_fatture }} &middot; {{ "%.2f"|format(somma_fatture) }} EUR</span>
+      </div>
+      <div class="vetrina-totale">
+        <span>Tasso di conversione</span>
+        <span id="vetrina-totale-valore" data-finale="{{ tasso_conversione }}" data-suffisso="%">0%</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="sezioni-rapide">
+    <a class="scheda-rapida" href="/preventivi/nuovo">
+      <svg class="icona-scheda" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M7 3h7l4 4v14H7z" stroke-linejoin="round"/>
+        <path d="M14 3v4h4" stroke-linejoin="round"/>
+        <path d="M9.5 12h5M9.5 15h5M9.5 18h3" stroke-linecap="round"/>
+      </svg>
+      <h2>Generazione preventivo</h2>
+      <p>Crea un nuovo preventivo, modificane uno esistente o duplicalo: il PDF si genera in automatico.</p>
+    </a>
+    <a class="scheda-rapida" href="/clienti">
+      <svg class="icona-scheda" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <circle cx="9" cy="8" r="3.2"/>
+        <path d="M3.5 19c0-3 2.5-5.3 5.5-5.3s5.5 2.3 5.5 5.3" stroke-linecap="round"/>
+        <circle cx="17.5" cy="8.5" r="2.4"/>
+        <path d="M15.8 13.3c2.3.4 4.2 2.3 4.2 4.9" stroke-linecap="round"/>
+      </svg>
+      <h2>Gestione clienti</h2>
+      <p>Anagrafica clienti sempre pronta: aggiungi, cerca, modifica o elimina in pochi click.</p>
+    </a>
+  </div>
+{% endblock %}
+{% block script_extra %}
+  <script src="/static/js/home.js"></script>
+{% endblock %}
