@@ -96,9 +96,29 @@
     </div>
   </div>
 
+  <div id="sfondo-modale-condividi" class="sfondo-pannello" hidden></div>
+  <div id="modale-condividi" class="modale-fattura" role="dialog" aria-modal="true" aria-labelledby="titolo-modale-condividi" hidden>
+    <div class="modale-corpo">
+      <div class="pannello-testata">
+        <h2 id="titolo-modale-condividi">Condividi</h2>
+        <button type="button" class="bottone-chiudi" data-chiudi-condividi aria-label="Chiudi">&times;</button>
+      </div>
+      <div class="modale-contenuto">
+        <p data-condividi-messaggio></p>
+        <p>Il tuo browser non supporta la condivisione diretta: scarica il PDF e allegalo al messaggio.</p>
+        <div class="passi-condividi">
+          <a class="bottone bottone-primario" data-condividi-scarica>1. Scarica il PDF</a>
+          <a class="bottone bottone-secondario" data-condividi-email>2. Apri email</a>
+          <a class="bottone bottone-secondario" data-condividi-whatsapp target="_blank" rel="noopener">2. Apri WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="/static/js/confirmazioni.js"></script>
   <script src="/static/js/pannello.js"></script>
   <script src="/static/js/fattura.js"></script>
+  <script src="/static/js/condividi.js"></script>
   {% block script_extra %}{% endblock %}
 </body>
 </html>

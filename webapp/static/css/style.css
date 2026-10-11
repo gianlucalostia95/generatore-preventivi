@@ -273,6 +273,9 @@ a:hover { text-decoration: underline; }
 .modale-contenuto { padding: 1.25rem 1.5rem 1.5rem; }
 .modale-contenuto .riepilogo-totali { margin-bottom: 1rem; }
 
+.passi-condividi { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
+.passi-condividi .bottone { width: 100%; justify-content: center; }
+
 /* ---------------- Intestazione di pagina ---------------- */
 .testata-pagina {
   display: flex;

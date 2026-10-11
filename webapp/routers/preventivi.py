@@ -244,6 +244,46 @@ def elimina_preventivo(preventivo_id: int):
     return RedirectResponse(url="/storico", status_code=303)
 
 
+@router.get("/preventivi/{preventivo_id}/preventivo.pdf")
+def scarica_preventivo(preventivo_id: int):
+    """Riscarica il PDF del preventivo (non della fattura) dallo storico, per condividerlo di nuovo."""
+    preventivo = database.ottieni_preventivo_completo(preventivo_id)
+    if preventivo is None:
+        raise HTTPException(status_code=404, detail="Preventivo non trovato")
+
+    riepilogo_iva = pdf_generator.calcola_riepilogo_iva_per_aliquota(preventivo["voci"])
+    pdf_bytes = pdf_generator.genera_pdf_documento(
+        tipo_documento="PREVENTIVO",
+        numero_documento=preventivo["numero"],
+        data_documento=date.fromisoformat(preventivo["data"]),
+        mittente={
+            "nome": preventivo["mittente_nome"],
+            "piva": preventivo["mittente_piva"],
+            "indirizzo": preventivo["mittente_indirizzo"],
+            "contatti": preventivo["mittente_contatti"],
+            "iban": preventivo["mittente_iban"],
+        },
+        cliente={
+            "nome": preventivo["cliente_nome"],
+            "indirizzo": preventivo["cliente_indirizzo"],
+            "piva": preventivo["cliente_piva"],
+            "email": preventivo["cliente_email"],
+        },
+        voci=preventivo["voci"],
+        subtotale=preventivo["subtotale"],
+        riepilogo_iva_per_aliquota=riepilogo_iva,
+        totale_iva=preventivo["totale_iva"],
+        totale=preventivo["totale"],
+        note=preventivo["note"] or "",
+        validita_giorni=preventivo["validita_giorni"],
+    )
+    return Response(
+        content=bytes(pdf_bytes),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="preventivo_{preventivo["numero"]}.pdf"'},
+    )
+
+
 @router.get("/preventivi/{preventivo_id}/fattura/anteprima")
 def anteprima_fattura(preventivo_id: int):
     """Dati di riepilogo per il pop-up di conferma, prima di generare davvero la fattura."""

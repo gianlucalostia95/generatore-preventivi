@@ -85,6 +85,21 @@
                 <button type="button" class="bottone bottone-primario bottone-piccolo" data-apri-modale-fattura data-preventivo-id="{{ p.id }}">Genera fattura PDF</button>
               {% endif %}
             </div>
+
+            <div class="azioni-scheda">
+              <button type="button" class="bottone bottone-secondario bottone-piccolo"
+                data-condividi data-tipo="preventivo" data-preventivo-id="{{ p.id }}"
+                data-numero="{{ p.numero }}" data-cliente="{{ p.cliente_nome }}" data-cliente-email="{{ p.cliente_email or '' }}">
+                Condividi preventivo
+              </button>
+              {% if p.numero_fattura %}
+                <button type="button" class="bottone bottone-secondario bottone-piccolo"
+                  data-condividi data-tipo="fattura" data-preventivo-id="{{ p.id }}"
+                  data-numero="{{ p.numero_fattura }}" data-cliente="{{ p.cliente_nome }}" data-cliente-email="{{ p.cliente_email or '' }}">
+                  Condividi fattura
+                </button>
+              {% endif %}
+            </div>
           </div>
         </details>
       {% endfor %}
