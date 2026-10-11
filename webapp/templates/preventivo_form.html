@@ -123,11 +123,11 @@
 
   <template id="modello-riga-voce">
     <tr class="riga-voce">
-      <td><input type="text" class="voce-descrizione" placeholder="Descrizione" aria-label="Descrizione della voce"></td>
-      <td class="col-qta"><input type="number" class="voce-quantita" min="0" step="1" value="1" aria-label="Quantità"></td>
-      <td class="col-prezzo"><input type="number" class="voce-prezzo" min="0" step="0.01" value="0.00" aria-label="Prezzo unitario in euro"></td>
-      <td class="col-iva"><input type="number" class="voce-iva" min="0" max="100" step="0.5" value="22" aria-label="Aliquota IVA percentuale"></td>
-      <td class="col-totale riga-totale-voce">0,00</td>
+      <td data-etichetta="Descrizione"><input type="text" class="voce-descrizione" placeholder="Descrizione" aria-label="Descrizione della voce"></td>
+      <td class="col-qta" data-etichetta="Quantità"><input type="number" class="voce-quantita" min="0" step="1" value="1" aria-label="Quantità"></td>
+      <td class="col-prezzo" data-etichetta="Prezzo unitario (EUR)"><input type="number" class="voce-prezzo" min="0" step="0.01" value="0.00" aria-label="Prezzo unitario in euro"></td>
+      <td class="col-iva" data-etichetta="IVA %"><input type="number" class="voce-iva" min="0" max="100" step="0.5" value="22" aria-label="Aliquota IVA percentuale"></td>
+      <td class="col-totale riga-totale-voce" data-etichetta="Totale riga">0,00</td>
       <td class="col-azione"><button type="button" class="rimuovi-riga" aria-label="Rimuovi voce" title="Rimuovi voce">&times;</button></td>
     </tr>
   </template>

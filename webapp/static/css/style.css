@@ -577,3 +577,76 @@ a:hover { text-decoration: underline; }
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* =======================================================================
+   Adattamento per smartphone (Android/iOS)
+   Il layout da desktop sopra non viene toccato: queste regole si attivano
+   solo sotto i breakpoint indicati, aggiustando solo cio' che altrimenti
+   andrebbe fuori schermo o richiederebbe uno scroll orizzontale.
+   ======================================================================= */
+
+/* iOS Safari ingrandisce automaticamente la pagina quando un campo con
+   focus ha un font sotto i 16px: lo forziamo solo qui sotto, senza
+   cambiare la dimensione vista su desktop/tablet. */
+@media (max-width: 600px) {
+  .campo input[type="text"],
+  .campo input[type="email"],
+  .campo input[type="date"],
+  .campo input[type="number"],
+  .campo select,
+  .campo textarea,
+  .tabella-voci input,
+  .barra-filtri input,
+  .barra-filtri select {
+    font-size: 16px;
+  }
+
+  /* Pulsanti di esportazione/espansione dello storico: vanno a capo
+     invece di uscire dallo schermo o essere tagliati. */
+  .barra-azioni-storico { flex-wrap: wrap; justify-content: flex-start; }
+
+  /* Tabella voci di spesa -> una scheda per voce, con l'etichetta sopra
+     ogni campo (da data-etichetta), invece di colonne strette o di uno
+     scroll orizzontale scomodo da usare per compilare un form. */
+  .tabella-voci thead { display: none; }
+  .tabella-voci, .tabella-voci tbody, .tabella-voci tr { display: block; width: 100%; }
+  .tabella-voci tr.riga-voce {
+    position: relative;
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.75rem 2.75rem 0.75rem 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .tabella-voci td {
+    display: block;
+    width: 100% !important;
+    padding: 0.4rem 0;
+    text-align: left !important;
+  }
+  .tabella-voci td[data-etichetta]::before {
+    content: attr(data-etichetta);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink-faint);
+    margin-bottom: 0.2rem;
+  }
+  .tabella-voci .col-azione {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: auto !important;
+    padding: 0;
+  }
+}
+
+/* Schermi molto stretti: niente larghezza minima fissa sui riepiloghi
+   totali (preventivo e modale fattura), altrimenti forzano uno scroll
+   orizzontale su telefoni piu' piccoli (es. iPhone SE, 375px e sotto). */
+@media (max-width: 480px) {
+  .riga-riepilogo { min-width: 0; width: 100%; }
+  .riepilogo-totali { align-items: stretch; }
+  .vetrina-riga, .vetrina-totale { flex-wrap: wrap; row-gap: 0.2rem; }
+}
