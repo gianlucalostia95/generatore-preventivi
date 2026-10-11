@@ -1,0 +1,24 @@
+# Configurazione per pubblicare il sito web (cartella webapp/) su Render
+# (https://render.com), piano gratuito. Render legge questo file in automatico
+# quando colleghi il repository ("New +" -> "Blueprint" -> seleziona questo
+# repo): non serve configurare build/start command a mano nella dashboard.
+#
+# Nota: qui non servono i certificati HTTPS locali (cartella certs/) ne' i
+# flag --ssl-keyfile/--ssl-certfile usati in locale da avvia_sito.bat/.vbs:
+# Render gestisce da solo un certificato HTTPS valido sul dominio pubblico
+# (*.onrender.com) e inoltra il traffico in HTTP semplice al container.
+#
+# Il database SQLite (preventivi.db) NON viene incluso nel repository (vedi
+# .gitignore): ogni deploy parte quindi con dati vuoti. Sul piano gratuito,
+# inoltre, il disco del container non e' permanente: i dati inseriti tramite
+# il sito pubblicato si perdono ad ogni nuovo deploy (e il servizio si
+# "addormenta" dopo 15 minuti di inattivita', con conseguente attesa di
+# qualche decina di secondi al primo utilizzo successivo). E' un comportamento
+# volutamente accettato per una demo pubblica, non un errore.
+services:
+  - type: web
+    name: generatore-preventivi
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn webapp.main:app --host 0.0.0.0 --port $PORT
